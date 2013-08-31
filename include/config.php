@@ -1,5 +1,13 @@
 <?php /** @file */
 
+/* create memcached object <ns@waitman.net> 2013-08-31 */
+
+if (USE_MEMCACHED) {
+	$mc = new Memcached();
+	$mc->addServer('127.0.0.1',11211);
+}
+
+
 /**
  *
  * Arbitrary configuration storage
@@ -23,15 +31,34 @@ function load_config($family) {
 
 	if(! array_key_exists('config_loaded',$a->config[$family])) {
 
-		$r = q("SELECT * FROM config WHERE cat = '%s'", dbesc($family));
-		if($r !== false) {
-			if($r) {
-				foreach($r as $rr) {
-					$k = $rr['k'];
-					$a->config[$family][$k] = $rr['v'];
+		$do_load = true;
+
+		if (USE_MEMCACHED) {
+			global $mc;
+			if (!($a->config[$family] = 
+				$mc->get('redconfig_'.$family))) 
+				$do_load = true;
+			else 
+				$do_load = false;
+		}
+		
+		if ($do_load) {
+			$r = q("SELECT * FROM config WHERE cat = '%s'", 
+				dbesc($family));
+			if($r !== false) {
+				if($r) {
+					foreach($r as $rr) {
+						$k = $rr['k'];
+						$a->config[$family][$k] = 
+							$rr['v'];
+					}
 				}
+				$a->config[$family]['config_loaded'] = true;
+				if (USE_MEMCACHED)
+					$mc->set('redconfig_'.$family,
+						$a->config[$family],
+						MEMCACHED_OBJECT_LIFE);
 			}
-			$a->config[$family]['config_loaded'] = true;
 		}
 	} 
 }

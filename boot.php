@@ -481,6 +481,22 @@ define ( 'ITEM_MENTIONSME',      0x0400);
 define ( 'ITEM_NOCOMMENT',       0x0800);  // commenting/followups are disabled
 define ( 'ITEM_OBSCURED',        0x1000);  // bit-mangled to protect from casual browsing by site admin
 
+
+/* use memcached <ns@waitman.net> 2013-08-31 
+
+	Notes: if you are new to Memcached, some pointers:
+		this implementation is not good for multi-user environments
+		other users can access and modify your cache. 
+		also memcached listens to *.11211 , if you do not 
+		have a firewall blocking 11211 from outside traffic 
+		then anyone on earth can access and modify your cache
+
+*/
+
+define ( 'USE_MEMCACHED',	1); 
+define ( 'MEMCACHED_OBJECT_LIFE',	60*60*2);
+
+
 /**
  *
  * Reverse the effect of magic_quotes_gpc if it is enabled.

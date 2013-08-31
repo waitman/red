@@ -22,6 +22,7 @@
     $displaystyle = false;
     $linkcolour = false;
     $shiny = false;
+    $twisted_photos = true;
 	$radius = 5;
     $site_line_height = get_config("redbasic","line_height");
     $site_redbasic_font_size = get_config("redbasic", "font_size" );
@@ -45,6 +46,7 @@
         $displaystyle = get_pconfig($uid, "redbasic", "displaystyle");
         $linkcolour = get_pconfig($uid, "redbasic", "linkcolour");
         $shiny = get_pconfig($uid, "redbasic", "shiny");
+	$twisted_photos = get_pconfig($uid, "redbasic", "twisted_photos");
 		$x = get_pconfig($uid,'redbasic','radius');
 		if($x !== false)
 			$radius = $x;
