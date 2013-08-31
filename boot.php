@@ -498,8 +498,8 @@ define ( 'ITEM_OBSCURED',        0x1000);  // bit-mangled to protect from casual
 
 define ( 'USE_MEMCACHED',	1); 
 define ( 'MEMCACHED_OBJECT_LIFE',	60*60*2);
-define ( 'MEMCACHED_PREFIX', 'redconfig');
-define ( 'MEMCACHED_P_PREFIX', 'refpconfig');
+define ( 'MEMCACHED_PREFIX', 'redconfig_');
+define ( 'MEMCACHED_P_PREFIX', 'refpconfig_');
 
 
 /**
