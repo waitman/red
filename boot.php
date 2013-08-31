@@ -491,10 +491,15 @@ define ( 'ITEM_OBSCURED',        0x1000);  // bit-mangled to protect from casual
 		have a firewall blocking 11211 from outside traffic 
 		then anyone on earth can access and modify your cache
 
+		you can set the MEMCACHED_PREFIX and MEMCACHED_P_PREFIX 
+		to random strings for a little extra sanity if you want
+
 */
 
 define ( 'USE_MEMCACHED',	1); 
 define ( 'MEMCACHED_OBJECT_LIFE',	60*60*2);
+define ( 'MEMCACHED_PREFIX', 'redconfig');
+define ( 'MEMCACHED_P_PREFIX', 'refpconfig');
 
 
 /**

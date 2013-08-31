@@ -11,5 +11,9 @@ var_dump($d);
 
 $d = $mc->get('redconfig_feature');
 var_dump($d);
+ 
+echo '------------------------------------'."\n";
 
+$d = $mc->get('redpconfig_1');
+var_dump($d);
 

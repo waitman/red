@@ -36,7 +36,7 @@ function load_config($family) {
 		if (USE_MEMCACHED) {
 			global $mc;
 			if (!($a->config[$family] = 
-				$mc->get('redconfig_'.$family))) 
+				$mc->get(MEMCACHED_PREFIX.$family))) 
 				$do_load = true;
 			else 
 				$do_load = false;
@@ -55,7 +55,7 @@ function load_config($family) {
 				}
 				$a->config[$family]['config_loaded'] = true;
 				if (USE_MEMCACHED)
-					$mc->set('redconfig_'.$family,
+					$mc->set(MEMCACHED_PREFIX.$family,
 						$a->config[$family],
 						MEMCACHED_OBJECT_LIFE);
 			}
@@ -107,6 +107,13 @@ function get_config_from_storage($family,$key) {
 
 function set_config($family,$key,$value) {
 	global $a;
+
+	if (USE_MEMCACHED) {
+		global $mc;
+		/* wipe cache so it will be reloaded */
+		$mc->delete(MEMCACHED_PREFIX.$family);
+	}
+
 	// manage array value
 	$dbvalue = ((is_array($value))  ? serialize($value) : $value);
 	$dbvalue = ((is_bool($dbvalue)) ? intval($dbvalue)  : $dbvalue);
@@ -158,23 +165,47 @@ function load_pconfig($uid,$family = '') {
 	if(! array_key_exists($uid,$a->config))
 		$a->config[$uid] = array();
 
+
+
+	$do_load = true;
+
+	if (USE_MEMCACHED) {
+		global $mc;
+		if (!($a->config[$uid] =
+			$mc->get(MEMCACHED_P_PREFIX.$uid)))
+			$do_load = true;
+		else
+			$do_load = false;
+	}
+	$do_load = true;
+
 	// family is no longer used - load entire user config
 
-	$r = q("SELECT * FROM `pconfig` WHERE `uid` = %d",
-		intval($uid)
-	);
 
-	if($r) {
-		foreach($r as $rr) {
-			$k = $rr['k'];
-			$c = $rr['cat'];
-			if(! array_key_exists($c,$a->config[$uid])) {
-				$a->config[$uid][$c] = array();
-				$a->config[$uid][$c]['config_loaded'] = true;
+	if ($do_load) {
+
+		$r = q("SELECT * FROM `pconfig` WHERE `uid` = %d",
+			intval($uid)
+		);
+
+		if($r) {
+			foreach($r as $rr) {
+				$k = $rr['k'];
+				$c = $rr['cat'];
+				if(! array_key_exists($c,$a->config[$uid])) {
+					$a->config[$uid][$c] = array();
+					$a->config[$uid][$c]['config_loaded']
+						 = true;
+				}
+				$a->config[$uid][$c][$k] = $rr['v'];
 			}
-			$a->config[$uid][$c][$k] = $rr['v'];
+			if (USE_MEMCACHED) {
+				$mc->set(MEMCACHED_P_PREFIX.$uid,
+					$a->config[$uid],
+					MEMCACHED_OBJECT_LIFE);
+			}
 		}
-	} 
+	}
 }
 
 
@@ -202,6 +233,12 @@ function get_pconfig($uid,$family, $key, $instore = false) {
 function set_pconfig($uid,$family,$key,$value) {
 
 	global $a;
+
+	/* wipe cache for reload */
+	if (USE_MEMCACHED) {
+		global $mc;
+		$mc->delete(MEMCACHED_P_PREFIX.$uid);
+	}
 
 
 	// manage array value
